@@ -29,7 +29,7 @@ def kana(update: Update, context: CallbackContext) -> None:
     ]
     
     try:
-        text = parse_command(PARAMETERS, DESCRIPTION, update)[1]["text"]
+        text = parse_command(PARAMETERS, DESCRIPTION, update, last_ignore_space=True)[1]["text"]
     except BadUsage:
         return
     

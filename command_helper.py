@@ -67,7 +67,7 @@ def page_message(update: Update, context: CallbackContext, text: str, reply: boo
         if reply:
             return update.effective_message.reply_text(text=text)
         else:
-            return context.bot.send_message(chat_id = chat_id, text=text)
+            return context.bot.send_message(chat_id=chat_id, text=text)
 
     if len(text) < MAX_MESSAGE_TXT_LENGTH:
         return [send(text=text)]
@@ -85,3 +85,9 @@ def page_message(update: Update, context: CallbackContext, text: str, reply: boo
     for part in parts:
         messages.append(send(text=part))
     return messages
+
+def reply(update: Update, context: CallbackContext, text: str) -> None:
+    if update.effective_message:
+        update.effective_message.reply_text(text=text)
+    else:
+        return context.bot.send_message(chat_id=update.effective_message.chat_id, text=text)

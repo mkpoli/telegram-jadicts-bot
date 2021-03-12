@@ -18,6 +18,7 @@ def weblio(update: Update, context: CallbackContext) -> None:
         return
     
     reply(
+        update, context,
         text=f'<a href="https://www.weblio.jp/content/{urllib.parse.quote(word)}">https://www.weblio.jp/content/{word}</a>',
     )
 
@@ -30,4 +31,7 @@ def version(update: Update, context: CallbackContext) -> None:
     except BadUsage:
         return
 
-    reply(f"<pre>v{ __version__ }</pre>")
+    reply(
+        update, context,
+        f"<pre>v{ __version__ }</pre>",
+    )

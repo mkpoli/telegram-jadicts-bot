@@ -1,19 +1,11 @@
 from pathlib import Path
 
-from telegram import (
-    ParseMode,
-)
-from telegram.ext import (
-    CommandHandler,
-    Defaults,
-    Updater
-)
+from telegram import ParseMode
+from telegram.ext import CommandHandler, Defaults, Updater
 
-from commands import weblio
+from commands import version, weblio
 
 BASE_DIR = Path(__file__).parent
-
-
 
 def main():
     with open(BASE_DIR / 'TOKEN') as f:
@@ -33,7 +25,8 @@ def main():
     # COMMANDS
     COMMANDS = {
         # Weblio
-        'weblio': weblio# weblio
+        'weblio': weblio,
+        'version': version
     }
 
     for command, handler in COMMANDS.items():
@@ -41,7 +34,6 @@ def main():
 
     updater.start_polling()
     updater.idle()
-
 
 if __name__ == '__main__':
     main()

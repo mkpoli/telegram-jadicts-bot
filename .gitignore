@@ -1,0 +1,13 @@
+# SAFETY
+TOKEN
+
+# Runtime Data
+*.db
+*.log
+
+# Python
+__pycache__/
+venv/
+
+# IDE
+.vscode/

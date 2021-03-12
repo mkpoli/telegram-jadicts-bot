@@ -1,24 +1,17 @@
 import pykakasi
-import re
+import regex
 
 kks = pykakasi.kakasi()
 
-def get_okurigana(a: str, b: str) -> str:
-    # Reverse
-    ra, rb = a[::-1], b[::-1]
-    def _iter():
-        for a, b in zip(ra, rb):
-            if a == b:
-                yield a
-            else:
-                return
-    return ''.join(reversed(list(_iter())))
+KANJI_PATTERN = regex.compile(r"(\p{Han}+)")
+def okurigana(orig, hira):
+    # e.g. お悔やみ申し上げる
+    new_pattern = KANJI_PATTERN.sub(r"(\p{Hiragana}+)", orig) # お(\p{Hiragana}+)やみ(\p{Hiragana}+)し(\p{Hiragana}+)げる
+    mgroups = regex.match(new_pattern, hira).groups() # く, もう, あ
+    filling = KANJI_PATTERN.sub(r"\1{}", orig) # お悔{}やみ申{}し上{}げる
+    return filling.format(*[f"（{x}）" for x in mgroups]) # お悔（く）やみ申（もう）し上（あ）げる
 
-def format_okurigana(orig: str, hira: str, okurigana: str) -> tuple[str, str, str]:
-    okurigana_length = len(okurigana)
-    return [orig[:-okurigana_length], hira[:-okurigana_length], okurigana]
-
-EMPTY_PATTERN = re.compile(r"(\s+)")
+EMPTY_PATTERN = regex.compile(r"(\s+)")
 
 def convert(text: str) -> str:
     def convert_part(part: str) -> str:
@@ -31,12 +24,7 @@ def convert(text: str) -> str:
         def l(item: dict) -> str:
             if item['orig'] == item['hira'] or item['orig'] == item['kana']:
                 return item['orig']
-            elif len(okurigana := get_okurigana(item['orig'], item['hira'])):
-                # 送り仮名
-                orig, hira, okrgn = format_okurigana(item['orig'], item['hira'], okurigana)
-                return f"{ orig }（{ hira }）{okrgn}"
-            else:
-                return f"{ item['orig'] }（{ item['hira'] }）"
+            return okurigana(item['orig'], item['hira'])
         
         return "".join(map(l, converted))
 

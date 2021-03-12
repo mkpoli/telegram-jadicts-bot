@@ -17,6 +17,8 @@ def main():
     if not token:
         raise KeyError("No TOKEN found!")
 
+    production = bool(os.environ.get('TELEGRAM_BOT_PRODUCTION', default=False))
+
     updater = Updater(
         defaults = Defaults(
             parse_mode=ParseMode.HTML,
@@ -39,7 +41,11 @@ def main():
     for command, handler in COMMANDS.items():
         dispatcher.add_handler(CommandHandler(command, handler))
 
-    updater.start_polling()
+    if production:
+        updater.start_webhook(port=int(os.environ.get('PORT', default=8000)))
+    else:
+        updater.start_polling()
+        
     updater.idle()
 
 if __name__ == '__main__':

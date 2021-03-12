@@ -1,3 +1,5 @@
+import os
+
 from pathlib import Path
 
 from telegram import ParseMode
@@ -8,9 +10,13 @@ from commands import kana, version, weblio
 BASE_DIR = Path(__file__).parent
 
 def main():
-    with open(BASE_DIR / 'TOKEN') as f:
-        token = f.read().strip()
-        
+    if not (token := os.environ.get('TELEGRAM_BOT_TOKEN')):
+        with open(BASE_DIR / 'TOKEN') as f:
+            token = f.read().strip()
+    
+    if not token:
+        raise KeyError("No TOKEN found!")
+
     updater = Updater(
         defaults = Defaults(
             parse_mode=ParseMode.HTML,

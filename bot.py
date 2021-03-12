@@ -3,7 +3,7 @@ from pathlib import Path
 from telegram import ParseMode
 from telegram.ext import CommandHandler, Defaults, Updater
 
-from commands import version, weblio
+from commands import kana, version, weblio
 
 BASE_DIR = Path(__file__).parent
 
@@ -26,7 +26,8 @@ def main():
     COMMANDS = {
         # Weblio
         'weblio': weblio,
-        'version': version
+        'version': version,
+        'kana': kana
     }
 
     for command, handler in COMMANDS.items():

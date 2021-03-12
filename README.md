@@ -14,3 +14,9 @@ python3.9 -m venv venv
 pip install -r requirements.txt
 python bot.py
 ```
+
+## Update *requirements.txt*
+
+```
+pip install pip-tools
+pip-compile .\requirements.

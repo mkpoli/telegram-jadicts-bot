@@ -1,0 +1,4 @@
+loguru==0.5.3
+regex==2020.11.13
+python-telegram-bot==13.3
+pykakasi==2.0.6

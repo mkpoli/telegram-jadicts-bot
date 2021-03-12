@@ -43,8 +43,6 @@ def main():
 
     for command, handler in COMMANDS.items():
         dispatcher.add_handler(CommandHandler(command, handler))
-        
-        logger.info("Registered")
 
     if production:
         url = os.environ.get('URL')

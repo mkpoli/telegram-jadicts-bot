@@ -1,6 +1,10 @@
+import urllib
+
 from _version import __version__
 from command_helper import Parameter, BadUsage, parse_command, reply
-from telegram import Update, CallbackContext
+from telegram import Update
+from telegram.ext import CallbackContext
+
 
 def weblio(update: Update, context: CallbackContext) -> None:
     DESCRIPTION = "Weblio 辞書"

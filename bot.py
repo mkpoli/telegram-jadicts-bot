@@ -1,24 +1,12 @@
-from command_helper import Parameter, BadUsage, parse_command
 from pathlib import Path
 
-import urllib
-
 from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
     ParseMode,
-    Update,
-    CallbackQuery
 )
 from telegram.ext import (
-    CallbackContext,
-    CallbackQueryHandler,
     CommandHandler,
     Defaults,
-    Filters,
-    MessageHandler,
-    PicklePersistence,
-    Updater,
+    Updater
 )
 
 from commands import weblio

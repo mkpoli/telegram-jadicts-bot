@@ -46,7 +46,7 @@ def parse_command(parameters: Sequence[Parameter], description: str, update: Upd
             if last_ignore_space and i == len(parameters) - 1:
                 # if last_ignore_space and in last parameter
                 # then join all other args
-                arg = ''.join(args[i:])
+                arg = ' '.join(args[i:])
             else:
                 try:
                     arg = args[i]

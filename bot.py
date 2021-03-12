@@ -1,5 +1,7 @@
 import os
 
+from loguru import logger
+
 from pathlib import Path
 
 from telegram import ParseMode
@@ -18,10 +20,11 @@ def main():
         raise KeyError("No TOKEN found!")
 
     production = bool(os.environ.get('TELEGRAM_BOT_PRODUCTION', default=False))
+    logger.debug(f"Production Mode = { production }")
 
     updater = Updater(
         defaults = Defaults(
-            parse_mode=ParseMode.HTML,
+            parse_mode = ParseMode.HTML,
             disable_notification=True,
             disable_web_page_preview=False
         ),
@@ -40,12 +43,24 @@ def main():
 
     for command, handler in COMMANDS.items():
         dispatcher.add_handler(CommandHandler(command, handler))
+        
+        logger.info("Registered")
 
     if production:
-        updater.start_webhook(port=int(os.environ.get('PORT', default=8000)))
+        url = os.environ.get('URL')
+        port = int(os.environ.get('PORT', 8000))
+        logger.info("Starting Webhook on 8000 ...")
+        updater.start_webhook(
+            listen="0.0.0.0",
+            port=port,
+            # url_path=token
+        )
+        updater.bot.set_webhook(url)
+        logger.info(f"Webhook set on { url }")
     else:
+        logger.info("Starting Polling...")
         updater.start_polling()
-        
+
     updater.idle()
 
 if __name__ == '__main__':

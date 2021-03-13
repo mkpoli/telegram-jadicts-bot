@@ -1,26 +1,19 @@
 import os
 
-from loguru import logger
+from _env import TOKEN, PRODUCTION_MODE
+from _version import __version__
 
-from pathlib import Path
+from loguru import logger
 
 from telegram import ParseMode
 from telegram.ext import CommandHandler, Defaults, Updater
 
 from commands import kana, version, weblio
 
-BASE_DIR = Path(__file__).parent
 
 def main():
-    if not (token := os.environ.get('TELEGRAM_BOT_TOKEN')):
-        with open(BASE_DIR / 'TOKEN') as f:
-            token = f.read().strip()
-    
-    if not token:
-        raise KeyError("No TOKEN found!")
-
-    production = bool(os.environ.get('TELEGRAM_BOT_PRODUCTION', default=False))
-    logger.debug(f"Production Mode = { production }")
+    logger.info(f"Running BOT version {__version__}")
+    logger.debug(f"Production Mode = { PRODUCTION_MODE }")
 
     updater = Updater(
         defaults = Defaults(
@@ -28,7 +21,7 @@ def main():
             disable_notification=True,
             disable_web_page_preview=False
         ),
-        token = token,
+        token = TOKEN,
         use_context = True
     )
     dispatcher = updater.dispatcher
@@ -44,7 +37,7 @@ def main():
     for command, handler in COMMANDS.items():
         dispatcher.add_handler(CommandHandler(command, handler))
 
-    if production:
+    if PRODUCTION_MODE:
         url = os.environ.get('URL')
         port = int(os.environ.get('PORT', 8000))
         logger.info("Starting Webhook on 8000 ...")

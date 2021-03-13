@@ -39,8 +39,10 @@ class Command:
         def handler(update: Update, context: CallbackContext):
             try:
                 args = parse_command(self.parameters, self.description, update, self.last_ignore_space)
-            except BadUsage:
+            except BadUsage as e:
                 command_usage(self.name, self.parameters, self.description, update)
+                bind_logger(update).debug(f'BadUsage: {e}')
+                return
             self.handler(update, context, self, args)
         return handler
 
@@ -57,14 +59,12 @@ def parse_command(parameters: Sequence[Parameter], description: str, update: Upd
         args = update.effective_message.text.split(maxsplit = max(1, len(parameters) - 1))[1:]
 
     bind_logger(update).debug(f"command={command}, args={','.join(args)}")
-    
-    bad_usage_cases = [
-        len(args) < len(required_parameters), # less than required
-        not last_ignore_space and len(args) > len(parameters), # over argument when not ignoring last
-    ]
 
-    if any(bad_usage_cases):
-        raise BadUsage
+    if len(args) < len(required_parameters):
+        raise BadUsage('args less than required')
+
+    if not last_ignore_space and len(args) > len(parameters):
+        raise BadUsage('over argument')
 
     TYPE_CONVERSION = {
         int: int,
@@ -84,10 +84,10 @@ def parse_command(parameters: Sequence[Parameter], description: str, update: Upd
             try:
                 arg = TYPE_CONVERSION(arg)
             except ValueError:
-                raise BadUsage
+                raise BadUsage('bad value of type')
                 
         if param.checker and not param.checker(arg):
-            raise BadUsage
+            raise BadUsage('failed check')
 
         result[param.name] = arg
 

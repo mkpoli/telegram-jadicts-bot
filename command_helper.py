@@ -54,7 +54,6 @@ def parse_command(parameters: Sequence[Parameter], description: str, update: Upd
 
     command_parts = update.effective_message.text.split()
     command, args = command_parts[0], command_parts[1:]
-    print(len)
     if last_ignore_space:
         args = update.effective_message.text.split(maxsplit = max(1, len(parameters) - 1))[1:]
 

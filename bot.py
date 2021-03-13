@@ -32,7 +32,9 @@ def main():
         Command('kana', kana, 'ふりがな', [Parameter('text', str, "原文")], last_ignore_space=True)
     ]
 
+    logger.debug('Registering Commands...')
     for command in COMMANDS:
+        logger.debug(f'  { command.name } - { command.description }')
         dispatcher.add_handler(CommandHandler(command.name, command.get_handler()))
 
     if PRODUCTION_MODE:

@@ -29,7 +29,7 @@ def main():
     COMMANDS = [
         *list(get_dictionary_commands()),
         Command('version', version, 'バージョン表示', []),
-        Command('kana', kana, 'ふりがな', [Parameter('text', str, "原文")])
+        Command('kana', kana, 'ふりがな', [Parameter('text', str, "原文")], last_ignore_space=True)
     ]
 
     for command in COMMANDS:

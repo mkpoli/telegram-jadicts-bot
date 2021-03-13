@@ -1,3 +1,4 @@
+
 import os
 
 from _env import TOKEN, PRODUCTION_MODE
@@ -9,7 +10,7 @@ from telegram import ParseMode
 from telegram.ext import CommandHandler, Defaults, Updater
 
 from commands import kana, version, weblio
-
+from command_helper import Command, Parameter
 
 def main():
     logger.info(f"Running BOT version {__version__}")
@@ -25,17 +26,16 @@ def main():
         use_context = True
     )
     dispatcher = updater.dispatcher
-    
-    # COMMANDS
-    COMMANDS = {
-        # Weblio
-        'weblio': weblio,
-        'version': version,
-        'kana': kana
-    }
 
-    for command, handler in COMMANDS.items():
-        dispatcher.add_handler(CommandHandler(command, handler))
+    # Register commands
+    COMMANDS = [
+        Command('weblio', weblio, 'Weblio 辞書', [Parameter('word', str, '調べたい内容')]),
+        Command('version', version, 'バージョン表示', []),
+        Command('kana', kana, 'ふりがな', [Parameter('text', str, "原文")])
+    ]
+
+    for command in COMMANDS:
+        dispatcher.add_handler(CommandHandler(command.name, command.get_handler()))
 
     if PRODUCTION_MODE:
         url = os.environ.get('URL')

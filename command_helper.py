@@ -24,9 +24,27 @@ class Parameter:
     def __repr__(self) -> str:
         return f"Parameter({self.name}, {self.type}, {self.desc})"
 
-def parse_command(parameters: Sequence[Parameter], description: str, update: Update, last_ignore_space=False) -> Tuple[str, dict]:
-    # TODO: maxsplit = arg - rparameter + 1 = (1 - 1 + 1) | (2 - 1 + 1)
+class Command:
+    def __init__(self, name: str, handler: Callable, description: str, parameters: Sequence[Parameter], last_ignore_space: bool=False) -> None:
+        self.name = name
+        self.handler = handler
+        self.description = description
+        self.parameters = parameters
+        self.last_ignore_space = last_ignore_space
+        
+    def __str__(self) -> str:
+        return f"Command({self.name}, {self.description})"
     
+    def get_handler(self) -> Callable:
+        def handler(update: Update, context: CallbackContext):
+            try:
+                args = parse_command(self.parameters, self.description, update, self.last_ignore_space)
+            except BadUsage:
+                command_usage(self.name, self.parameters, self.description, update)
+            self.handler(update, context, self, args)
+        return handler
+
+def parse_command(parameters: Sequence[Parameter], description: str, update: Update, last_ignore_space=False) -> Tuple[str, dict]:
     required_parameters = list(filter(lambda x: not x.optional, parameters))
 
     if last_ignore_space and len(required_parameters) != len(parameters):
@@ -56,31 +74,27 @@ def parse_command(parameters: Sequence[Parameter], description: str, update: Upd
 
     result = {}
 
-    try:
-        for i, param in enumerate(parameters):
-            try:
-                arg = args[i]
-            except IndexError:
-                break
-            
-            if param.type in TYPE_CONVERSION:
-                try:
-                    arg = TYPE_CONVERSION(arg)
-                except ValueError:
-                    raise BadUsage
-                    
-            if param.checker and not param.checker(arg):
-                raise BadUsage
-            result[param.name] = arg
-
-        return command, result
-    except ValueError:
-        command_usage(command, parameters, description, update)
+    for i, param in enumerate(parameters):
+        try:
+            arg = args[i]
+        except IndexError:
+            break
         
-        # command, args = update.effective_message.text, []
+        if param.type in TYPE_CONVERSION:
+            try:
+                arg = TYPE_CONVERSION(arg)
+            except ValueError:
+                raise BadUsage
+                
+        if param.checker and not param.checker(arg):
+            raise BadUsage
+
+        result[param.name] = arg
+
+    return result
 
 def command_usage(command: str, parameters: Sequence[Parameter], description: str, update: Update) -> None: 
-    command_repr = f"{command} {' '.join(f'⟨{param.name}⟩' for param in parameters)}"
+    command_repr = f"/{command} {' '.join(f'⟨{param.name}⟩' for param in parameters)}"
     if parameters:
         max_length = max(len(param.name) for param in parameters)
         paramtr_desc = "\n".join(f"    <code>{param.name.rjust(max_length)}</code> - {param.desc} " for param in parameters)

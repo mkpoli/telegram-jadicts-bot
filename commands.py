@@ -27,6 +27,10 @@ DICTIONARYS = {
         'desc': 'Weblio 辞書',
         'link': 'https://www.weblio.jp/content/{}',
     },
+    'goo': {
+        'desc': 'goo 国語辞書',
+        'link': 'https://dictionary.goo.ne.jp/word/{}/'
+    }
 }
 
 def get_dictionary_commands():

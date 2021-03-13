@@ -1,5 +1,6 @@
 import pykakasi
 import regex
+import jaconv
 
 kks = pykakasi.kakasi()
 
@@ -22,10 +23,10 @@ def convert(text: str) -> str:
         converted = kks.convert(part)
         
         def l(item: dict) -> str:
-            if item['orig'] == item['hira'] or item['orig'] == item['kana']:
+            if jaconv.kata2hira(item['orig']) == item['hira']:
                 return item['orig']
             return okurigana(item['orig'], item['hira'])
-        
+
         return "".join(map(l, converted))
 
     return "".join(map(convert_part, EMPTY_PATTERN.split(text)))

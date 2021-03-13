@@ -20,3 +20,9 @@ python bot.py
 ```
 pip install pip-tools
 pip-compile .\requirements.
+```
+
+## Development
+```
+nodemon --exec python bot.py
+```

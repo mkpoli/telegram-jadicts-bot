@@ -1,19 +1,12 @@
-from typing import Any, Sequence
 import urllib
 
 from _env import PRODUCTION_MODE
 from _version import __version__
-from command_helper import Command, reply
+from command_helper import Command, Parameter, reply
 from kana_convert import convert
 from telegram import Update
 from telegram.ext import CallbackContext
-
-def weblio(update: Update, context: CallbackContext, command: Command, args: Sequence[Any]) -> None:
-    word = args['word']
-    reply(
-        update, context,
-        text=f'<a href="https://www.weblio.jp/content/{urllib.parse.quote(word)}">https://www.weblio.jp/content/{word}</a>',
-    )
+from typing import Any, Sequence
 
 def kana(update: Update, context: CallbackContext, command: Command, args: Sequence[Any]) -> None:
     text = args['text']    
@@ -27,3 +20,23 @@ def version(update: Update, context: CallbackContext, command: Command, args: Se
         update, context,
         f"<pre>v{ __version__ } { '[dev]' if not PRODUCTION_MODE else '' }</pre>",
     )
+
+# Generate Dictionary Comamnds
+DICTIONARYS = {
+    'weblio': {
+        'desc': 'Weblio 辞書',
+        'link': 'https://www.weblio.jp/content/{}',
+    },
+}
+
+def get_dictionary_commands():
+    for name, info in DICTIONARYS.items():
+        desc = info['desc']
+        link = info['link']
+        def handler(update: Update, context: CallbackContext, command: Command, args: Sequence[Any]) -> None:
+            word = args['word']
+            reply(
+                update, context,
+                text=f'<a href="{ link.format(urllib.parse.quote(word)) }">{ link.format(word) }</a>',
+            )
+        yield Command(name, handler, desc, [Parameter('word', str, '調べたい内容')])

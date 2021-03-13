@@ -1,15 +1,13 @@
-
 import os
 
 from _env import TOKEN, PRODUCTION_MODE
 from _version import __version__
 
 from loguru import logger
-
 from telegram import ParseMode
 from telegram.ext import CommandHandler, Defaults, Updater
 
-from commands import kana, version, weblio
+from commands import kana, get_dictionary_commands, version
 from command_helper import Command, Parameter
 
 def main():
@@ -29,7 +27,7 @@ def main():
 
     # Register commands
     COMMANDS = [
-        Command('weblio', weblio, 'Weblio 辞書', [Parameter('word', str, '調べたい内容')]),
+        *list(get_dictionary_commands()),
         Command('version', version, 'バージョン表示', []),
         Command('kana', kana, 'ふりがな', [Parameter('text', str, "原文")])
     ]

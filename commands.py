@@ -21,26 +21,30 @@ def version(update: Update, context: CallbackContext, command: Command, args: Se
         f"<pre>v{ __version__ } { '[dev]' if not PRODUCTION_MODE else '' }</pre>",
     )
 
-# Generate Dictionary Comamnds
-DICTIONARYS = {
-    'weblio': {
-        'desc': 'Weblio 辞書',
-        'link': 'https://www.weblio.jp/content/{}',
-    },
-    'goo': {
-        'desc': 'goo 国語辞書',
-        'link': 'https://dictionary.goo.ne.jp/word/{}/'
-    }
-}
-
-def get_dictionary_commands():
-    for name, info in DICTIONARYS.items():
-        desc = info['desc']
-        link = info['link']
+class Dictionary:
+    def __init__(self, name: str, desc: str, link: str) -> None:
+        self.name = name
+        self.desc = desc
+        self.link = link
+        
+    def generate_command(self) -> Command:
         def handler(update: Update, context: CallbackContext, command: Command, args: Sequence[Any]) -> None:
             word = args['word']
             reply(
                 update, context,
-                text=f'<a href="{ link.format(urllib.parse.quote(word)) }">{ link.format(word) }</a>',
+                text=f'<a href="{ self.link.format(urllib.parse.quote(word)) }">{ self.link.format(word) }</a>',
             )
-        yield Command(name, handler, desc, [Parameter('word', str, '調べたい内容')])
+        return Command(self.name, handler, self.desc, [Parameter('word', str, '調べたい内容')])
+
+# Generate Dictionary Comamnds
+DICTIONARYS = [
+    # Weblio
+    Dictionary('weblio', 'Weblio 辞書', 'https://www.weblio.jp/content/{}'),
+    Dictionary('cjjc', 'Weblio 日中・中日辞典', 'https://cjjc.weblio.jp/content/{}'),
+    # goo
+    Dictionary('goo', 'goo 国語辞書', 'https://dictionary.goo.ne.jp/srch/all/{}/m0u/')
+]
+
+def get_dictionary_commands():
+    for dictionary in DICTIONARYS:
+        yield dictionary.generate_command()

@@ -22,7 +22,6 @@ EMPTY_PATTERN = regex.compile(r"(\s+)")
 
 def convert(text: str) -> str:
     def convert_part(part: str) -> str:
-        print(f"part={part}")
         if EMPTY_PATTERN.match(part):
             return part
 
@@ -34,5 +33,6 @@ def convert(text: str) -> str:
             return okurigana(item['orig'], item['hira'])
 
         return "".join(map(l, converted))
-
-    return "".join(map(convert_part, EMPTY_PATTERN.split(text)))
+    parts = EMPTY_PATTERN.split(text)
+    logger.debug(f"Convert parts = {parts}")
+    return "".join(map(convert_part, parts))

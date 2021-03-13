@@ -1,3 +1,4 @@
+from distutils.util import strtobool
 from telegram import Update, Message
 from telegram.ext import CallbackContext
 from typing import Callable, Optional, Sequence, Tuple
@@ -24,36 +25,50 @@ class Parameter:
         return f"Parameter({self.name}, {self.type}, {self.desc})"
 
 def parse_command(parameters: Sequence[Parameter], description: str, update: Update, last_ignore_space=False) -> Tuple[str, dict]:
-    splited = update.effective_message.text.split()
-    command = splited[0]
+    # TODO: maxsplit = arg - rparameter + 1 = (1 - 1 + 1) | (2 - 1 + 1)
+    
+    required_parameters = list(filter(lambda x: not x.optional, parameters))
+
+    if last_ignore_space and len(required_parameters) != len(parameters):
+        raise IndexError("Optional parameters cannot co-exist with last_ignore_space=True !")
+
+    command_parts = update.effective_message.text.split()
+    command, args = command_parts[0], command_parts[1:]
+    print(len)
+    if last_ignore_space:
+        args = update.effective_message.text.split(maxsplit = max(1, len(parameters) - 1))[1:]
+
+    bind_logger(update).debug(f"command={command}, args={','.join(args)}")
+    
+    bad_usage_cases = [
+        len(args) < len(required_parameters), # less than required
+        not last_ignore_space and len(args) > len(parameters), # over argument when not ignoring last
+    ]
+
+    if any(bad_usage_cases):
+        raise BadUsage
+
+    TYPE_CONVERSION = {
+        int: int,
+        float: float,
+        bool: lambda x: bool(strtobool(x))
+    }
+
+    result = {}
+
     try:
-        args = splited[1:]
-        bind_logger(update).debug(f"command={command}, args={','.join(args)}")
-        # bind_logger(update).debug(f"len(parameters)={len(parameters)}, len(args)={len(args)}, filter(lambda x: not x.optional, parameters)={list(filter(lambda x: not x.optional, parameters))}")
-
-        required_parameters = list(filter(lambda x: not x.optional, parameters))
-
-        bad_usage_cases = [
-            len(args) < len(required_parameters), # less than required
-            not last_ignore_space and len(args) > len(parameters), # over argument when not ignoring last
-        ]
-
-        if any(bad_usage_cases):
-            raise BadUsage
-        
-        result = {}
         for i, param in enumerate(parameters):
-            if last_ignore_space and i == len(parameters) - 1:
-                # if last_ignore_space and in last parameter
-                # then join all other args
-                arg = ' '.join(args[i:])
-            else:
+            try:
+                arg = args[i]
+            except IndexError:
+                break
+            
+            if param.type in TYPE_CONVERSION:
                 try:
-                    arg = args[i]
-                except IndexError:
-                    break
-            if param.type == int:
-                arg = int(arg)
+                    arg = TYPE_CONVERSION(arg)
+                except ValueError:
+                    raise BadUsage
+                    
             if param.checker and not param.checker(arg):
                 raise BadUsage
             result[param.name] = arg
@@ -61,7 +76,7 @@ def parse_command(parameters: Sequence[Parameter], description: str, update: Upd
         return command, result
     except ValueError:
         command_usage(command, parameters, description, update)
-        raise BadUsage
+        
         # command, args = update.effective_message.text, []
 
 def command_usage(command: str, parameters: Sequence[Parameter], description: str, update: Update) -> None: 

@@ -1,5 +1,6 @@
 import urllib
 
+from _env import PRODUCTION_MODE
 from _version import __version__
 from command_helper import Parameter, BadUsage, parse_command, reply
 from kana_convert import convert
@@ -37,8 +38,6 @@ def kana(update: Update, context: CallbackContext) -> None:
         update, context,
         text=convert(text)
     )
-    
-    
 
 def version(update: Update, context: CallbackContext) -> None:
     DESCRIPTION = "バージョン表示"
@@ -51,5 +50,5 @@ def version(update: Update, context: CallbackContext) -> None:
 
     reply(
         update, context,
-        f"<pre>v{ __version__ }</pre>",
+        f"<pre>v{ __version__ } { '[dev]' if not PRODUCTION_MODE else '' }</pre>",
     )

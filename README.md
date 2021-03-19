@@ -25,4 +25,6 @@ pip-compile .\requirements.
 ## Development
 ```
 nodemon --exec python bot.py
+
+# In venv: nodemon --exec "./venv/scripts/python bot.py" -e py
 ```

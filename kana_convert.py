@@ -21,8 +21,8 @@ def okurigana(orig, hira):
 EMPTY_PATTERN = regex.compile(r"(\s+)")
 
 def convert(text: str) -> str:
-    def convert_part(part: str) -> str:
-        if EMPTY_PATTERN.match(part):
+    def convert_part(index: int, part: str) -> str:
+        if index % 2 != 0:
             return part
 
         converted = kks.convert(part)
@@ -35,4 +35,4 @@ def convert(text: str) -> str:
         return "".join(map(l, converted))
     parts = EMPTY_PATTERN.split(text)
     logger.debug(f"Convert parts = {parts}")
-    return "".join(map(convert_part, parts))
+    return "".join(convert_part(index, part) for index, part in enumerate(parts))

@@ -1,4 +1,4 @@
-# Telegram 用 辞書 BOT
+# Telegram 用日本語辞書 BOT
 
 Currently running at: [@jadicts_bot](https://telegram.me/jadicts_bot)
 

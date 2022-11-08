@@ -1,12 +1,15 @@
 # Logging
 from loguru import logger
-from telegram import Update
+from telegram import Message
 
-def bind_logger(update: Update):
+
+def bind_logger(message: Message):
     context_logger = logger.bind(
-        chat_id=update.effective_message.chat.id,
-        chat_title=update.effective_message.chat.title if update.effective_message.chat.type != 'private' else f"@{update.effective_message.chat.username} ({update.effective_message.chat.last_name}, {update.effective_message.chat.first_name})",
-        message_id=update.effective_message.message_id,
-        message_text=update.effective_message.text
+        chat_id=message.chat.id,
+        chat_title=message.chat.title
+        if message.chat.type != "private"
+        else f"@{message.chat.username} ({message.chat.last_name}, {message.chat.first_name})",
+        message_id=message.message_id,
+        message_text=message.text,
     )
     return context_logger

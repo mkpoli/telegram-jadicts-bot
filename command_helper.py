@@ -4,7 +4,7 @@ from distutils.util import strtobool
 from loguru import logger
 from telegram import Update, Message
 from telegram.ext import CallbackContext, Dispatcher
-from typing import Callable, Optional, Sequence, TypeVar, Dict
+from typing import Callable, Optional, Sequence, Dict
 from logging_utils import bind_logger
 
 
@@ -57,9 +57,14 @@ class Command:
 
     def get_handler(self) -> Callable:
         def handler(update: Update, context: CallbackContext):
+            if not update.effective_message:
+                return
             try:
                 args = parse_command(
-                    self.parameters, self.description, update, self.last_ignore_space
+                    self.parameters,
+                    self.description,
+                    update.effective_message,
+                    self.last_ignore_space,
                 )
             except BadUsage as e:
                 command_usage(
@@ -68,7 +73,7 @@ class Command:
                     self.description,
                     update.effective_message,
                 )
-                bind_logger(update).debug(f"BadUsage: {e}")
+                bind_logger(update.effective_message).debug(f"BadUsage: {e}")
                 return
             self.handler(update, context, self, args)
 
@@ -78,7 +83,7 @@ class Command:
 def parse_command(
     parameters: Sequence[Parameter],
     description: str,
-    update: Update,
+    effective_message: Message,
     last_ignore_space=False,
 ) -> Dict[str, str]:
     required_parameters = list(filter(lambda x: not x.optional, parameters))
@@ -88,12 +93,12 @@ def parse_command(
             "Optional parameters cannot co-exist with last_ignore_space=True !"
         )
 
-    command_parts = update.message.text.split()
+    command_parts = effective_message.text.split()
     command, args = command_parts[0], command_parts[1:]
     if last_ignore_space:
-        args = update.message.text.split(maxsplit=max(1, len(parameters) - 1))[1:]
+        args = effective_message.text.split(maxsplit=max(1, len(parameters) - 1))[1:]
 
-    bind_logger(update).debug(f"command={command}, args={','.join(args)}")
+    bind_logger(effective_message).debug(f"command={command}, args={','.join(args)}")
 
     if len(args) < len(required_parameters):
         raise BadUsage("args less than required")
@@ -144,9 +149,6 @@ def _delete_after(delay: int, message: Message):
     return
 
 
-RT = TypeVar("RT")
-
-
 def delete_after(delay: int) -> Callable[[Callable[..., Message]], Callable[..., None]]:
     def decorator(func: Callable[..., Message]) -> Callable[..., None]:
         def wrapper(*args, **kwargs) -> None:
@@ -187,37 +189,6 @@ def command_usage(
     )
 
     return sent_message
-
-
-MAX_MESSAGE_TXT_LENGTH = 4096
-RESERVE_SPACE = 10
-
-
-def page_message(
-    update: Update, context: CallbackContext, text: str, reply: bool = False
-) -> Sequence[Message]:
-    def send(text):
-        if reply and update.effective_message:
-            return update.effective_message.reply_text(text=text)
-        else:
-            return context.bot.send_message(chat_id=update.message.chat_id, text=text)
-
-    if len(text) < MAX_MESSAGE_TXT_LENGTH:
-        return [send(text=text)]
-
-    page_length = MAX_MESSAGE_TXT_LENGTH - RESERVE_SPACE
-    parts = [text[i : i + page_length] for i in range(0, len(text), page_length)]
-    # we are reserving 8 characters for adding the page number in
-    # the following format: [01/10]
-
-    parts = [f"[{i + 1}/{len(parts)}] \n{part}" for i, part in enumerate(parts)]
-
-    bind_logger(update).debug(f"Sending message in {len(parts)} pages")
-
-    messages = []
-    for part in parts:
-        messages.append(send(text=part))
-    return messages
 
 
 def reply(update: Update, context: CallbackContext, text: str) -> Message:

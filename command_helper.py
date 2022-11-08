@@ -4,7 +4,7 @@ from distutils.util import strtobool
 from loguru import logger
 from telegram import Update, Message
 from telegram.ext import CallbackContext, Dispatcher
-from typing import Callable, Optional, Sequence, TypeVar
+from typing import Callable, Optional, Sequence, TypeVar, Dict
 from logging_utils import bind_logger
 
 
@@ -80,7 +80,7 @@ def parse_command(
     description: str,
     update: Update,
     last_ignore_space=False,
-) -> dict[str, str]:
+) -> Dict[str, str]:
     required_parameters = list(filter(lambda x: not x.optional, parameters))
 
     if last_ignore_space and len(required_parameters) != len(parameters):
@@ -101,7 +101,7 @@ def parse_command(
     if not last_ignore_space and len(args) > len(parameters):
         raise BadUsage("over argument")
 
-    TYPE_CONVERSION: dict[type, Callable] = {
+    TYPE_CONVERSION: Dict[type, Callable] = {
         int: int,
         float: float,
         bool: lambda x: bool(strtobool(x)),
@@ -163,7 +163,7 @@ def delete_after(delay: int) -> Callable[[Callable[..., Message]], Callable[...,
 
 @delete_after(10)
 def command_usage(
-    command: str, parameters: list[Parameter], description: str, reply_to: Message
+    command: str, parameters: Sequence[Parameter], description: str, reply_to: Message
 ) -> Message:
     """Reply to user when a bad command usage is found.
 

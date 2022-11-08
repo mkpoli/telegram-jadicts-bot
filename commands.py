@@ -6,18 +6,18 @@ from command_helper import Command, Parameter, reply
 from kana_convert import convert
 from telegram import Update
 from telegram.ext import CallbackContext
-from typing import Any, Sequence
+from typing import Dict
 
 
 def kana(
-    update: Update, context: CallbackContext, command: Command, args: dict[str, str]
+    update: Update, context: CallbackContext, command: Command, args: Dict[str, str]
 ) -> None:
     text = args["text"]
     reply(update, context, text=convert(text))
 
 
 def version(
-    update: Update, context: CallbackContext, command: Command, args: dict[str, str]
+    update: Update, context: CallbackContext, command: Command, args: Dict[str, str]
 ) -> None:
     reply(
         update,
@@ -37,7 +37,7 @@ class Dictionary:
             update: Update,
             context: CallbackContext,
             command: Command,
-            args: dict[str, str],
+            args: Dict[str, str],
         ) -> None:
             word = args["word"]
             reply(

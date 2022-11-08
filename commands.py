@@ -1,7 +1,7 @@
 import urllib
 
 from _env import PRODUCTION_MODE
-from _version import __version__
+from single_source import __version__
 from command_helper import Command, Parameter, reply
 from kana_convert import convert
 from telegram import Update

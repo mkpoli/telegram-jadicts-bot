@@ -9,5 +9,8 @@ TOKEN
 __pycache__/
 venv/
 
+# PDM
+.pdm.toml
+
 # IDE
 .vscode/

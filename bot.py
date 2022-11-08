@@ -1,7 +1,8 @@
 import os
 
 from _env import TOKEN, PRODUCTION_MODE
-from _version import __version__
+
+from single_source import __version__
 
 from loguru import logger
 from telegram import ParseMode

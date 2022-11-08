@@ -1,6 +1,6 @@
 [project]
 name = "telegram-jadicts-bot"
-version = "0.3.0"
+version = "0.3.1"
 description = "Telegram 日本語辞書 BOT"
 authors = [{ name = "mkpoli", email = "mkpoli@mkpo.li" }]
 dependencies = [
